@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<blueprint xmlns="http://www.osgi.org/xmlns/blueprint/v1.0.0"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:camel="http://camel.apache.org/schema/blueprint"
+       xsi:schemaLocation="
+       http://www.osgi.org/xmlns/blueprint/v1.0.0 http://www.osgi.org/xmlns/blueprint/v1.0.0/blueprint.xsd
+       http://camel.apache.org/schema/blueprint http://camel.apache.org/schema/blueprint/camel-blueprint.xsd">
+
+  <bean id="counter" class="org.blogdemo.twitterdemo.SourceCounter" />
+  <bean id="sourceAggrateStrategy" class="org.blogdemo.twitterdemo.SourceAggrateStrategy" />
+  <camelContext trace="false" id="blueprintContext" xmlns="http://camel.apache.org/schema/blueprint">
+    <propertyPlaceholder location="classpath:twitter.properties" id="twitter"/>
+    <route id="Route2">
+        <from uri="seda:aggdata"/>
+        <aggregate completionTimeout="5000" strategyRef="sourceAggrateStrategy">
+            <correlationExpression>
+                <constant>true</constant>
+            </correlationExpression>
+            <setBody>
+            	<simple>Summarizing the device tweeting every 10 secs from my twitter using Camel, ${body}</simple>
+            </setBody>
+            <log message ="${body}"/>
+            <to uri="twitter://timeline/user?consumerKey={{consumerKey}}&amp;consumerSecret={{consumerSecret}}&amp;accessToken={{accessToken}}&amp;accessTokenSecret={{accessTokenSecret}}" />
+        </aggregate>
+    </route>
+    <route id="Route1">
+        <from uri="twitter://timeline/home?type=polling&amp;delay=10&amp;consumerKey={{consumerKey}}&amp;consumerSecret={{consumerSecret}}&amp;accessToken={{accessToken}}&amp;accessTokenSecret={{accessTokenSecret}}"/>
+        <log message="${body.source} ==>  ${body}"/>
+        <choice>
+            <when>
+                <simple>${body.source} contains "Web Client" </simple>
+                <setHeader headerName="deviceType">
+                    <constant>Web</constant>
+                </setHeader>
+            </when>
+            <when>
+                <simple>${body.source} contains "Android" </simple>
+                <setHeader headerName="deviceType">
+                    <constant>Android</constant>
+                </setHeader>
+            </when>
+            <when>
+                <simple>${body.source} contains "iPhone" </simple>
+                <setHeader headerName="deviceType">
+                    <constant>iPhone</constant>
+                </setHeader>
+            </when>
+            <otherwise>
+                <setHeader headerName="deviceType">
+                    <constant>Others</constant>
+                </setHeader>
+            </otherwise>
+        </choice>
+        <to uri="seda:aggdata"/>
+    </route>
+</camelContext>
+
+
+</blueprint>
