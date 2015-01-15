@@ -1,0 +1,26 @@
+{
+  "name":"Twitter Connector DEMO",
+  "summary":"This is a simple demo, that polls tweets every 10 secs from your personal timeline, and analysis the source device of the tweets, and make a summary of how many time each device was use and tweets the result back to Twitter!",
+  "author":"Christina Lin",
+  "level":"Beginner",
+  "published":true,
+  "prerequisites":"Java VM 1.6 or 1.7, Maven",
+  "targetProduct":"JBoss Fuse",
+  "productVersion":"JBoss Fuse 6.1",
+  "technologies": ["Camel","Fuse", "Karaf","Fabric8"],
+  "links": [ 
+    { 
+      "name":"Video",
+      "url":"https://vimeo.com/112716541"
+    },
+    {
+      "name":"Blog",
+      "url":"http://wei-meilin.blogspot.tw/2014/11/jboss-fuse-connecting-to-twitter-and.html"
+    }
+    ,
+    {
+      "name":"Code",
+      "url":"https://github.com/jbossdemocentral/jboss-fuse-component-twitter"
+    }
+  ]
+}
