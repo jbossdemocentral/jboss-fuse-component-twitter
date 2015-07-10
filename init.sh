@@ -1,10 +1,10 @@
 #!/bin/sh 
-DEMO="JBoss Fuse Camel Twitter Connector andthe Aggregator pattern Demo"
-VERSION=6.1.0
+DEMO="JBoss Fuse Camel Twitter andthe Aggregator Demo"
+VERSION=6.2.0
 AUTHORS="Christina Lin"
-PROJECT="git@github.com/weimeilin79/facebookconnector.git"
-FUSE=jboss-fuse-6.1.0.redhat-379
-FUSE_BIN=jboss-fuse-full-6.1.0.redhat-379.zip
+PROJECT="jbossdemocentral/jboss-fuse-component-twitter"
+FUSE=jboss-fuse-6.2.0.redhat-133
+FUSE_BIN=jboss-fuse-full-6.2.0.redhat-133.zip
 DEMO_HOME=./target
 FUSE_HOME=$DEMO_HOME/$FUSE
 FUSE_PROJECT=./project/twitterdemo
@@ -37,7 +37,7 @@ echo "##                                                             ##"
 echo "##  brought to you by,                                         ##"   
 echo "##                    ${AUTHORS}                            ##"
 echo "##                                                             ##"   
-echo "##  ${PROJECT}           ##"
+echo "##  ${PROJECT}              ##"
 echo "##                                                             ##"   
 echo "#################################################################"
 echo
@@ -97,38 +97,54 @@ cp support/users.properties $FUSE_SERVER_CONF
 
 echo "  - making sure 'FUSE' for server is executable..."
 echo
-chmod u+x $FUSE_HOME/bin/start
+chmod u+x $FUSE_SERVER_BIN/start
+chmod u+x $FUSE_SERVER_BIN/client
 
-cd target/$FUSE
 
 echo "  - Start up Fuse in the background"
 echo
-sh bin/start
+sh $FUSE_SERVER_BIN/start
 
-sleep 15
 
 echo "  - Create Fabric in Fuse"
 echo
-sh bin/client -r 3 -d 20 -u admin -p admin 'fabric:create --wait-for-provisioning'
+sh $FUSE_SERVER_BIN/client -r 3 -d 10 -u admin -p admin 'fabric:create'
+     
+sleep 15
 
-pwd
+#===Test if the fabric is ready=====================================
+echo Testing fabric,retry when not ready
+while true; do
+    if [ $(sh $FUSE_SERVER_BIN/client 'fabric:status'| grep "100%" | wc -l ) -ge 3 ]; then
+        break
+    fi
+    sleep 2
+done
+#===================================================================
 
 echo "Go to Project directory"
 echo      
-cd ../../$FUSE_PROJECT 
+cd $FUSE_PROJECT 
 
 echo "Start compile and deploy twitter camel example project to fuse"
 echo         
 mvn fabric8:deploy
 
 
-cd ../../target/$FUSE
+cd ../..
 
-sleep 15 
-
+#===Test if the fabric is ready=====================================
+echo Testing profiles,retry when not ready
+while true; do
+    if [ $(sh $FUSE_SERVER_BIN/client 'profile-list'| grep "demo-twitter"| wc -l ) -ge 1 ]; then
+        break
+    fi
+    sleep 2
+done
+#===================================================================
 echo "Add profile to container"
 echo         
-sh bin/client -r 2 -d 40 'container-create-child --profile demo-twitter root testcon'
+sh $FUSE_SERVER_BIN/client -r 2 -d 40 'container-create-child --profile demo-twitter root twittercon'
 
 echo "To stop the backgroud Fuse process, please go to bin and execute stop"
 echo
