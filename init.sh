@@ -1,10 +1,10 @@
 #!/bin/sh 
 DEMO="JBoss Fuse Camel Twitter andthe Aggregator Demo"
-VERSION=6.2.0
+VERSION=6.2.1
 AUTHORS="Christina Lin"
 PROJECT="jbossdemocentral/jboss-fuse-component-twitter"
-FUSE=jboss-fuse-6.2.0.redhat-133
-FUSE_BIN=jboss-fuse-full-6.2.0.redhat-133.zip
+FUSE=jboss-fuse-6.2.1.redhat-084
+FUSE_BIN=jboss-fuse-full-6.2.1.redhat-084.zip
 DEMO_HOME=./target
 FUSE_HOME=$DEMO_HOME/$FUSE
 FUSE_PROJECT=./project/twitterdemo
